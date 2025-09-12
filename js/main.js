@@ -373,3 +373,147 @@ mailChimp();
 $('.slicknav_nav a').on('click', function() {
   $('.slicknav_btn').trigger('click'); // Simulates clicking the menu button to close it
 });
+
+
+ const allEvents = [
+      "COLLOQUIUM (2 M/E)",
+      "QUAESTIUM (1 M/E)",
+      "ALGOTIUM (1 M/E)",
+      "INNOVARIUM (Team)",
+      "DESIGNIUM (1 M/E)",
+      "BLENDARIUM (1 M/E)",
+      "PHOTOGRAPHY (1 M/E)",
+      "POSTER CREATION (1 M/E)"
+    ];
+
+    const dropdowns = document.querySelectorAll('.event-dropdown');
+
+    function populateDropdowns() {
+      dropdowns.forEach(dropdown => {
+        dropdown.innerHTML = '<option value="">Select</option>';
+        allEvents.forEach(event => {
+          const option = document.createElement('option');
+          option.value = event;
+          option.text = event;
+          dropdown.appendChild(option);
+        });
+      });
+    }
+
+    function updateEventOptions() {
+      const selectedValues = Array.from(dropdowns).map(d => d.value);
+      dropdowns.forEach(dropdown => {
+        const currentValue = dropdown.value;
+        dropdown.innerHTML = '<option value="">Select</option>';
+        allEvents.forEach(event => {
+          if (!selectedValues.includes(event) || event === currentValue) {
+            const option = document.createElement('option');
+            option.value = event;
+            option.text = event;
+            dropdown.appendChild(option);
+          }
+        });
+        dropdown.value = currentValue;
+      });
+    }
+
+    populateDropdowns();
+
+    const membersDropdown = document.getElementById("members");
+    const memberDetailsDiv = document.getElementById("memberDetails");
+    const form = document.getElementById("registrationForm");
+
+    function renderMemberFields(count) {
+      memberDetailsDiv.innerHTML = "";
+      for (let i = 1; i <= count; i++) {
+        const memberDiv = document.createElement("div");
+        memberDiv.classList.add("member-section");
+        let role = i === 1 ? "Team Leader" : `Member ${i}`;
+        memberDiv.innerHTML = `
+          <h4>${role}</h4>
+          <label>${role} Name</label>
+          <input type="text" class="member-name" placeholder="${role} Name" required>
+          <label>${role} Email</label>
+          <input type="email" class="member-email" placeholder="${role} Email" required>
+        `;
+        memberDetailsDiv.appendChild(memberDiv);
+      }
+    }
+
+    renderMemberFields(1);
+
+    membersDropdown.addEventListener("change", (e) => {
+      renderMemberFields(parseInt(e.target.value));
+    });
+
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    function validateMobile(mobile) {
+      return /^[0-9]{10}$/.test(mobile);
+    }
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+      let valid = true;
+      let errors = [];
+
+      if (!document.getElementById("teamName").value.trim()) {
+        valid = false;
+        errors.push("Team Name is required.");
+      }
+      if (!document.getElementById("collegeName").value.trim()) {
+        valid = false;
+        errors.push("College Name is required.");
+      }
+      if (!membersDropdown.value) {
+        valid = false;
+        errors.push("Please select number of members.");
+      }
+
+      document.querySelectorAll(".member-name").forEach(input => {
+        if (!input.value.trim()) {
+          valid = false;
+          errors.push("All member names are required.");
+        }
+      });
+
+      document.querySelectorAll(".member-email").forEach(input => {
+        if (!validateEmail(input.value)) {
+          valid = false;
+          errors.push("All member emails must be valid.");
+        }
+      });
+
+      const selectedEvents = Array.from(dropdowns).map(d => d.value).filter(v => v);
+      if (selectedEvents.length < 3) {
+        valid = false;
+        errors.push("Please select 3 different events.");
+      }
+      if (new Set(selectedEvents).size !== 3) {
+        valid = false;
+        errors.push("Events must be unique.");
+      }
+
+      const mobile = document.getElementById("mobile").value;
+      if (!validateMobile(mobile)) {
+        valid = false;
+        errors.push("Mobile number must be 10 digits.");
+      }
+
+      const file = document.getElementById("paymentScreenshot").files[0];
+      if (!file) {
+        valid = false;
+        errors.push("Payment screenshot is required.");
+      }
+
+      if (valid) {
+        alert("✅ Form submitted successfully!");
+        form.reset();
+        renderMemberFields(1);
+        populateDropdowns();
+      } else {
+        alert("❌ Please fix the following:\n\n" + errors.join("\n"));
+      }
+    });
