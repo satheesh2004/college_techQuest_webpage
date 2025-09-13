@@ -210,16 +210,31 @@ function submitForm() {
   const form = document.getElementById("registrationForm");
   const formData = new FormData(form);
 
-  // Input fields
   const teamNameField = document.getElementById("teamName");
   const mobileField = document.getElementById("mobile");
 
   // Remove previous error styles/messages
   teamNameField.classList.remove("error-input");
   mobileField.classList.remove("error-input");
-
   const oldError = document.getElementById("form-error");
   if (oldError) oldError.remove();
+
+  const submitBtn = document.querySelector(".form-submit-btn");
+
+  // Save original button text
+  const originalBtnContent = submitBtn.innerHTML;
+
+  // Create inline spinner element
+  const spinner = document.createElement("span");
+  spinner.innerText = "⏳"; // simple spinner emoji
+  spinner.style.display = "inline-block";
+  spinner.style.marginRight = "8px";
+
+  // Set button to spinner + text
+  submitBtn.innerHTML = "";
+  submitBtn.appendChild(spinner);
+  submitBtn.appendChild(document.createTextNode("Registering..."));
+  submitBtn.disabled = true;
 
   fetch("https://mzcet-omega.vercel.app/api/techquest/register", {
     method: "POST",
@@ -228,10 +243,13 @@ function submitForm() {
     .then(async res => {
       const data = await res.json();
 
+      // Restore button state
+      submitBtn.innerHTML = originalBtnContent;
+      submitBtn.disabled = false;
+
       if (!res.ok) {
         console.log("Response:", data);
 
-        // Create a general error message above REGISTER button
         const msg = document.createElement("p");
         msg.id = "form-error";
         msg.style.color = "red";
@@ -248,10 +266,7 @@ function submitForm() {
           msg.innerText = "❌ Registration failed. Please check your details.";
         }
 
-        // Insert message above REGISTER button
-        const submitBtn = document.querySelector(".form-submit-btn");
         submitBtn.insertAdjacentElement("beforebegin", msg);
-
         throw new Error(data.error || "Registration failed");
       }
 
@@ -260,7 +275,12 @@ function submitForm() {
       console.log("Response:", data);
     })
     .catch(err => {
+      // Restore button state on error
+      submitBtn.innerHTML = originalBtnContent;
+      submitBtn.disabled = false;
+
       console.error("Error:", err.message);
     });
 }
+
 
