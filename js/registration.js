@@ -221,7 +221,7 @@ function submitForm() {
   const oldError = document.getElementById("form-error");
   if (oldError) oldError.remove();
 
-  fetch("http://10.201.197.208:5000/api/techquest/register", {
+  fetch("https://mzcet-omega.vercel.app/api/techquest/register", {
     method: "POST",
     body: formData
   })
