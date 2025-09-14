@@ -339,3 +339,8 @@ body {
     font-weight: 900;
     color: orangered;
  }
+
+.error-input {
+  border: 2px solid red !important;
+  box-shadow: 0 0 5px red;
+}

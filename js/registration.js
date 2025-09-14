@@ -124,14 +124,14 @@ function validateMobile(mobile) {
 //   document.querySelectorAll(".member-name").forEach((input, index) => {
 //     if (!input.value.trim()) {
 //       valid = false;
-//       errors.push(`Name of ${index === 0 ? "Team Leader" : "Member " + (index + 1)} is required.`);
+//       errors.push(Name of ${index === 0 ? "Team Leader" : "Member " + (index + 1)} is required.);
 //     }
 //   });
 
 //   document.querySelectorAll(".member-email").forEach((input, index) => {
 //     if (!validateEmail(input.value)) {
 //       valid = false;
-//       errors.push(`${index === 0 ? "Team Leader" : "Member " + (index + 1)} Email is invalid.`);
+//       errors.push(${index === 0 ? "Team Leader" : "Member " + (index + 1)} Email is invalid.);
 //     }
 //   });
 
@@ -210,31 +210,21 @@ function submitForm() {
   const form = document.getElementById("registrationForm");
   const formData = new FormData(form);
 
+  // Input fields
   const teamNameField = document.getElementById("teamName");
   const mobileField = document.getElementById("mobile");
+
+  // Loader element
+  const loadingIndicator = document.getElementById("loadingIndicator");
 
   // Remove previous error styles/messages
   teamNameField.classList.remove("error-input");
   mobileField.classList.remove("error-input");
-  const oldError = document.getElementById("form-error");
-  if (oldError) oldError.remove();
+  const oldErrors = document.querySelectorAll(".form-error");
+  oldErrors.forEach(err => err.remove());
 
-  const submitBtn = document.querySelector(".form-submit-btn");
-
-  // Save original button text
-  const originalBtnContent = submitBtn.innerHTML;
-
-  // Create inline spinner element
-  const spinner = document.createElement("span");
-  spinner.innerText = "⏳"; // simple spinner emoji
-  spinner.style.display = "inline-block";
-  spinner.style.marginRight = "8px";
-
-  // Set button to spinner + text
-  submitBtn.innerHTML = "";
-  submitBtn.appendChild(spinner);
-  submitBtn.appendChild(document.createTextNode("Registering..."));
-  submitBtn.disabled = true;
+  // 🔵 Show loader
+  loadingIndicator.style.display = "inline";
 
   fetch("https://mzcet-omega.vercel.app/api/techquest/register", {
     method: "POST",
@@ -243,44 +233,68 @@ function submitForm() {
     .then(async res => {
       const data = await res.json();
 
-      // Restore button state
-      submitBtn.innerHTML = originalBtnContent;
-      submitBtn.disabled = false;
+      // 🔵 Hide loader after response
+      loadingIndicator.style.display = "none";
 
       if (!res.ok) {
         console.log("Response:", data);
+        let msg;
 
-        const msg = document.createElement("p");
-        msg.id = "form-error";
-        msg.style.color = "red";
-        msg.style.fontWeight = "bold";
-        msg.style.textAlign = "center";
-
-        if (data.error.includes("team")) {
+        // Case 1: Team name error
+        if (data.error.toLowerCase().includes("team")) {
           teamNameField.classList.add("error-input");
+
+          msg = document.createElement("p");
+          msg.classList.add("form-error");
+          msg.style.color = "red";
+          msg.style.fontSize = "14px";
+          msg.style.marginTop = "5px";
           msg.innerText = "❌ Team name is already taken.";
-        } else if (data.error.includes("mobile")) {
+          teamNameField.insertAdjacentElement("afterend", msg);
+
+          // Also show under Register button
+          const btnError = document.createElement("p");
+          btnError.classList.add("form-error");
+          btnError.style.color = "red";
+          btnError.style.fontWeight = "bold";
+          btnError.style.textAlign = "center";
+          btnError.innerText = "❌ Unique team name is required!";
+          document.querySelector(".form-submit-btn").insertAdjacentElement("beforebegin", btnError);
+        } 
+        // Case 2: Mobile number error
+        else if (data.error.toLowerCase().includes("mobile")) {
           mobileField.classList.add("error-input");
+
+          msg = document.createElement("p");
+          msg.classList.add("form-error");
+          msg.style.color = "red";
+          msg.style.fontSize = "14px";
+          msg.style.marginTop = "5px";
           msg.innerText = "❌ Mobile number is already registered.";
-        } else {
+          mobileField.insertAdjacentElement("afterend", msg);
+        } 
+        // Case 3: General error
+        else {
+          msg = document.createElement("p");
+          msg.classList.add("form-error");
+          msg.style.color = "red";
+          msg.style.fontWeight = "bold";
+          msg.style.textAlign = "center";
           msg.innerText = "❌ Registration failed. Please check your details.";
+          document.querySelector(".form-submit-btn").insertAdjacentElement("beforebegin", msg);
         }
 
-        submitBtn.insertAdjacentElement("beforebegin", msg);
         throw new Error(data.error || "Registration failed");
       }
 
-      // Success
+      // ✅ Success
       alert("✅ Registration Successful!");
-      console.log("Response:", data);
+       form.reset(); 
+     
     })
     .catch(err => {
-      // Restore button state on error
-      submitBtn.innerHTML = originalBtnContent;
-      submitBtn.disabled = false;
-
+      // 🔵 Hide loader even if error
+      loadingIndicator.style.display = "none";
       console.error("Error:", err.message);
     });
 }
-
-

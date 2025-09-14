@@ -113,6 +113,21 @@
 }
 
 
+.upload-btn {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.upload-btn:hover {
+  background-color: #45a049;
+}
+
+
     </style>
     <!-- <link rel="stylesheet" href="css/responsive.css"> -->
 </head>
@@ -561,7 +576,7 @@
         The fee per head is <span class="ruppee">&#8377;150</span>
       </div>
 
-      
+     
 
     
 <div>
@@ -644,16 +659,28 @@
 
       <!-- File Upload -->
       <div class="form-upload-wrapper">
-        <div class="file-upload-section">
-          <label for="paymentScreenshot">Payment Screenshot</label>
-          <input type="file" id="paymentScreenshot" name="paymentScreenshot" class="input-file" accept="image/png, image/jpeg" />
-        </div>
-      </div>
-      <p class="form-note" style="text-align: center;">* If you want to pay on the spot, you don't need to provide a payment screenshot.</p>
-
+  <div class="file-upload-section">
+    <label for="paymentScreenshot">Payment Screenshot *</label>
+    <input 
+      type="file" 
+      id="paymentScreenshot" 
+      name="paymentScreenshot" 
+      class="input-file" 
+      accept="image/png, image/jpeg" 
+      required
+    />
+  </div>
+</div>
       <!-- Submit Button -->
       
-      <button type="button" class="form-submit-btn" onclick="submitForm()">REGISTER</button>
+     <!-- Submit Button -->
+<div style="text-align: center; margin-top: 15px;">
+  <button type="button" class="form-submit-btn" onclick="submitForm()">REGISTER</button>
+  <span id="loadingIndicator" style="display:none; margin-left:10px; color:white; font-weight:bold;">
+    ⏳ Loading...
+  </span>
+</div>
+
 
     </form>
   </div>
