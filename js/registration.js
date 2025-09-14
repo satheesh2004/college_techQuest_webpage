@@ -217,11 +217,15 @@ function submitForm() {
   // Loader element
   const loadingIndicator = document.getElementById("loadingIndicator");
 
-  // Remove previous error styles/messages
-  teamNameField.classList.remove("error-input");
-  mobileField.classList.remove("error-input");
-  const oldErrors = document.querySelectorAll(".form-error");
-  oldErrors.forEach(err => err.remove());
+  // Remove previous errors
+  [teamNameField, mobileField].forEach(f => f.classList.remove("error-input"));
+  document.querySelectorAll(".form-error").forEach(e => e.remove());
+
+  // ✅ First check HTML5 required fields
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
 
   // 🔵 Show loader
   loadingIndicator.style.display = "inline";
@@ -233,55 +237,32 @@ function submitForm() {
     .then(async res => {
       const data = await res.json();
 
-      // 🔵 Hide loader after response
+      // 🔵 Hide loader
       loadingIndicator.style.display = "none";
 
       if (!res.ok) {
-        console.log("Response:", data);
-        let msg;
+        let lowerError = (data.error || "").toLowerCase();
 
-        // Case 1: Team name error
-        if (data.error.toLowerCase().includes("team")) {
+        // 🔴 General error under the form
+        const generalMsg = document.createElement("p");
+        generalMsg.classList.add("form-error");
+        generalMsg.style.color = "red";
+        generalMsg.style.fontWeight = "bold";
+        generalMsg.style.textAlign = "center";
+        generalMsg.innerText = "❌ Please fill the details correctly.";
+        document.querySelector(".form-submit-btn").insertAdjacentElement("beforebegin", generalMsg);
+
+        // 🔴 Specific case: Duplicate team name
+        if (lowerError.includes("team") || lowerError.includes("duplicate")) {
           teamNameField.classList.add("error-input");
 
-          msg = document.createElement("p");
+          const msg = document.createElement("p");
           msg.classList.add("form-error");
           msg.style.color = "red";
           msg.style.fontSize = "14px";
           msg.style.marginTop = "5px";
           msg.innerText = "❌ Team name is already taken.";
           teamNameField.insertAdjacentElement("afterend", msg);
-
-          // Also show under Register button
-          const btnError = document.createElement("p");
-          btnError.classList.add("form-error");
-          btnError.style.color = "red";
-          btnError.style.fontWeight = "bold";
-          btnError.style.textAlign = "center";
-          btnError.innerText = "❌ Unique team name is required!";
-          document.querySelector(".form-submit-btn").insertAdjacentElement("beforebegin", btnError);
-        } 
-        // Case 2: Mobile number error
-        else if (data.error.toLowerCase().includes("mobile")) {
-          mobileField.classList.add("error-input");
-
-          msg = document.createElement("p");
-          msg.classList.add("form-error");
-          msg.style.color = "red";
-          msg.style.fontSize = "14px";
-          msg.style.marginTop = "5px";
-          msg.innerText = "❌ Mobile number is already registered.";
-          mobileField.insertAdjacentElement("afterend", msg);
-        } 
-        // Case 3: General error
-        else {
-          msg = document.createElement("p");
-          msg.classList.add("form-error");
-          msg.style.color = "red";
-          msg.style.fontWeight = "bold";
-          msg.style.textAlign = "center";
-          msg.innerText = "❌ Registration failed. Please check your details.";
-          document.querySelector(".form-submit-btn").insertAdjacentElement("beforebegin", msg);
         }
 
         throw new Error(data.error || "Registration failed");
@@ -289,12 +270,22 @@ function submitForm() {
 
       // ✅ Success
       alert("✅ Registration Successful!");
-       form.reset(); 
-     
+      form.reset();
     })
     .catch(err => {
-      // 🔵 Hide loader even if error
       loadingIndicator.style.display = "none";
       console.error("Error:", err.message);
     });
+}
+
+// Helper to show error
+function showError(field, message) {
+  field.classList.add("error-input");
+  const msg = document.createElement("p");
+  msg.classList.add("form-error");
+  msg.style.color = "red";
+  msg.style.fontSize = "14px";
+  msg.style.marginTop = "5px";
+  msg.innerText = "❌ " + message;
+  field.insertAdjacentElement("afterend", msg);
 }
